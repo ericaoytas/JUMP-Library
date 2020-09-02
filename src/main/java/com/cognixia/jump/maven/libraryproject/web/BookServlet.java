@@ -18,6 +18,7 @@ import com.cognixia.jump.maven.libraryproject.model.Book;
 /**
  * Servlet implementation class BookServlet
  */
+
 public class BookServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     private BookDao bookDao;
@@ -30,24 +31,29 @@ public class BookServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-		List<Book> allBooks = bookDao.getAllBooks();
-		request.setAttribute("allBooks", allBooks);
-		
-		String bookAction = request.getParameter("userType");
-		System.out.println(bookAction);
 		RequestDispatcher dispatcher = null;
-		switch (bookAction) {
-		case "librarian":
-			dispatcher = request.getRequestDispatcher("librarian.jsp");
-			break;
-		case "patron":
-			dispatcher = request.getRequestDispatcher("patron.jsp");
-			break;
-		default:
-			request.setAttribute("isValid", "Sorry, something went wrong.");
-			dispatcher = request.getRequestDispatcher("/");
+		try {
+			List<Book> allBooks = bookDao.getAllBooks();
+			request.setAttribute("allBooks", allBooks);
+			String bookAction = request.getParameter("userType");
+
+			switch (bookAction) {
+			case "librarian":
+				dispatcher = request.getRequestDispatcher("jsp/librarian.jsp");
+				break;
+			case "patron":
+				dispatcher = request.getRequestDispatcher("jsp/patron.jsp");
+				break;
+			default:
+				request.setAttribute("isValid", "Sorry, something went wrong.");
+				dispatcher = request.getRequestDispatcher("/");
+			}
+		} catch (SQLException e) {
+			response.setStatus(500);
+			dispatcher = request.getRequestDispatcher("jsp/error.jsp");
+			e.printStackTrace();
 		}
-		
+
 		dispatcher.forward(request, response);
 	}
 
@@ -55,24 +61,30 @@ public class BookServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		String bookAction = request.getParameter("bookAction");
-		
-		switch (bookAction) {
-		case "add":
-			addBooks(request, response);
-			break;
-		case "update":
-			updateBooks(request, response);
-			break;
-		default:
-			
+		RequestDispatcher  dispatcher = null;
+		try {
+			switch (bookAction) {
+			case "add":
+				addBooks(request, response);
+				break;
+			case "update":
+				updateBooks(request, response);
+				break;
+			default:
+				
+			}
+			dispatcher = request.getRequestDispatcher("jsp/librarian.jsp");
+		} catch (SQLException e) {
+			response.setStatus(500);
+			dispatcher = request.getRequestDispatcher("jsp/error.jsp");
+			e.printStackTrace();
 		}
 		
-		RequestDispatcher dispatcher = request.getRequestDispatcher("librarian.jsp");
 		dispatcher.forward(request, response);
 	}
 	
 	private void addBooks(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws ServletException, IOException, SQLException {
 		
 		String isbn = request.getParameter("isbn");
 		String title = request.getParameter("title");
@@ -92,7 +104,7 @@ public class BookServlet extends HttpServlet {
 	}
 	
 	private void updateBooks(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+			throws ServletException, IOException, SQLException {
 		
 		String isbn = request.getParameter("isbn");
 		
@@ -102,7 +114,6 @@ public class BookServlet extends HttpServlet {
 			String description = request.getParameter("description");
 			boolean rented = book.isRented();
 			String addedToLibrary = book.getAddedToLibrary();
-			
 			
 			Book updatedBook = new Book(isbn, title, description, rented, addedToLibrary);
 			

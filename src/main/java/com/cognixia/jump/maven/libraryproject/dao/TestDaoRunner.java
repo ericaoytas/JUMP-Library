@@ -10,7 +10,6 @@ import com.cognixia.jump.maven.libraryproject.model.Patron;
 
 public class TestDaoRunner {
 	public static void main(String[] args) {
-		 LibrarianDao libDao = new LibrarianDao();
-		 System.out.println(libDao.getByUsername("nerdlib"));
+		 // TODO
 	}
 }

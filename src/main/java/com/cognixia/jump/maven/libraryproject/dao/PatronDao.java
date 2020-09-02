@@ -75,27 +75,24 @@ public class PatronDao {
 		}
 		return patron;
 	}
-	public Patron getPatronByUsername(String username) {
+	public Patron getPatronByUsername(String username) throws SQLException {
 		Patron patron = null;
-		try(PreparedStatement pstmt = conn.prepareStatement(SELECT_PATRON_BY_USERNAME)) {
-			pstmt.setString(1, username);
-			ResultSet rs = pstmt.executeQuery();
+		PreparedStatement pstmt = conn.prepareStatement(SELECT_PATRON_BY_USERNAME);
+		pstmt.setString(1, username);
+		ResultSet rs = pstmt.executeQuery();
 
-			rs.next();
-			int patronId = rs.getInt("patron_id");
-			String firstName = rs.getString("first_name");
-			String lastName = rs.getString( "last_name");
-			String userName = rs.getString("username");
-			String passWord = rs.getString("password");
-			boolean accountFrozen = rs.getBoolean("account_frozen");
-			
-			patron = new Patron(patronId,firstName,lastName, userName, passWord, accountFrozen);
+		rs.next();
+		int patronId = rs.getInt("patron_id");
+		String firstName = rs.getString("first_name");
+		String lastName = rs.getString( "last_name");
+		String userName = rs.getString("username");
+		String passWord = rs.getString("password");
+		boolean accountFrozen = rs.getBoolean("account_frozen");
+		
+		patron = new Patron(patronId,firstName,lastName, userName, passWord, accountFrozen);
 
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("Couldn't find patron");
-		}
+		rs.close();
+		pstmt.close();
 
 		return patron;
 	}

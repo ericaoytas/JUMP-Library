@@ -1,9 +1,11 @@
 package com.cognixia.jump.maven.libraryproject.web;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +16,7 @@ import com.cognixia.jump.maven.libraryproject.dao.PatronDao;
 import com.cognixia.jump.maven.libraryproject.model.Librarian;
 import com.cognixia.jump.maven.libraryproject.model.Patron;
 
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -27,38 +30,50 @@ public class LoginServlet extends HttpServlet {
 		
 	}
 	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		RequestDispatcher dispatcher = null;
-		String radioButton = request.getParameter("user");
-		System.out.println(radioButton);
-		
-		boolean isValid=false;
-		
-		switch(radioButton) {
-		case "librarian":
-			if ((isValid = verifyLibrarianLogin(request, response))) {
-				dispatcher=request.getRequestDispatcher("librarian.jsp");
-				isValid=true;
-			}			
-			break;
-		case "patron":
-			if ((isValid = verifyPatronLogin(request, response))) {
-				dispatcher=request.getRequestDispatcher("patron.jsp");
-				isValid=true;
-			}
-			break;
-		default:	
-			
-		}
-		if (!isValid) {
-			request.setAttribute("isValid", "Login Failed. Please try again.");
-			dispatcher=request.getRequestDispatcher("/");
-		} 
-		System.out.println(dispatcher);
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
 		dispatcher.forward(request, response);
 	}
 	
-	private boolean verifyLibrarianLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		RequestDispatcher dispatcher = null;
+		String radioButton = request.getParameter("user");
+		
+		boolean isValid=false;
+		
+		try {
+			switch(radioButton) {
+			case "librarian":
+				if ((isValid = verifyLibrarianLogin(request, response))) {
+					dispatcher=request.getRequestDispatcher("jsp/librarian.jsp");
+					isValid=true;
+				}			
+				break;
+			case "patron":
+				if ((isValid = verifyPatronLogin(request, response))) {
+					dispatcher=request.getRequestDispatcher("jsp/patron.jsp");
+					isValid=true;
+				}
+				break;
+			default:	
+				
+			}
+			
+			if (!isValid) {
+				request.setAttribute("isValid", "Login Failed. Please try again.");
+				dispatcher=request.getRequestDispatcher("/");
+			} 
+			
+		} catch (SQLException e) {
+			response.setStatus(500);
+			dispatcher=request.getRequestDispatcher("jsp/error.jsp");
+		}
+
+		dispatcher.forward(request, response);
+	}
+	
+	private boolean verifyLibrarianLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
 		HttpSession session = request.getSession(true);
 		Librarian librarian = librarianDao.getByUsername(request.getParameter("uname"));
 		if (librarian == null) {
@@ -76,7 +91,7 @@ public class LoginServlet extends HttpServlet {
 	}
 }
 	
-	private boolean verifyPatronLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+	private boolean verifyPatronLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException{
 		HttpSession session = request.getSession(true);
 		Patron patron = patronDao.getPatronByUsername(request.getParameter("uname"));
 		if (patron == null) {

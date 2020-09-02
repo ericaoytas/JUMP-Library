@@ -30,12 +30,18 @@ public class BookCheckoutDao {
 //			stmt.setString(5, bc.getReturned());
 		
 		int rowCount = stmt.executeUpdate();
+		
+
+		stmt.close();
+		
 		if (rowCount > 0) {
 			return true;
 		} else {
 			return false;
 		}
 
+
+		
 	}
 	
 	public List<BookCheckout> getCheckoutsByPatronId(int pId) throws SQLException {
@@ -43,7 +49,7 @@ public class BookCheckoutDao {
 		List<BookCheckout> bcList = new ArrayList<>();
 		
 		PreparedStatement stmt = conn.prepareStatement(GET_BY_ID_QUERY);
-			stmt.setInt(1, pId);
+		stmt.setInt(1, pId);
 			
 		ResultSet rs = stmt.executeQuery();
 		
@@ -57,52 +63,54 @@ public class BookCheckoutDao {
 			
 			BookCheckout bc = new BookCheckout(checkoutId, patronId, isbn,checkedout, dueDate, returned);
 			bcList.add(bc);
-
+		}
+		
+		rs.close();
+		stmt.close();
 		
 		return bcList;
 	}
 	
-	public List<BookCheckout> getAllCheckouts() {
+	public List<BookCheckout> getAllCheckouts() throws SQLException {
 		List<BookCheckout> bcList = new ArrayList<>();
-		try (PreparedStatement stmt = conn.prepareStatement(GET_ALL_CHECKOUTS)) {
-			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
-				int checkoutId = rs.getInt("checkout_id");
-				int patronId = rs.getInt("patron_id");
-				String isbn = rs.getString("isbn");
-				String checkedout = rs.getString("checkedout");
-				String dueDate = rs.getString("due_date");
-				String returned = rs.getString("returned");
-				BookCheckout bc = new BookCheckout(checkoutId, patronId, isbn,checkedout, dueDate, returned);
-				bcList.add(bc);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		PreparedStatement stmt = conn.prepareStatement(GET_ALL_CHECKOUTS);
+		ResultSet rs = stmt.executeQuery();
+		while (rs.next()) {
+			int checkoutId = rs.getInt("checkout_id");
+			int patronId = rs.getInt("patron_id");
+			String isbn = rs.getString("isbn");
+			String checkedout = rs.getString("checkedout");
+			String dueDate = rs.getString("due_date");
+			String returned = rs.getString("returned");
+			BookCheckout bc = new BookCheckout(checkoutId, patronId, isbn,checkedout, dueDate, returned);
+			bcList.add(bc);
 		}
+
+		rs.close();
+		stmt.close();
+		
 		return bcList;
 	}
 	
-	public boolean updateCheckout(BookCheckout bc) {
-		try (PreparedStatement stmt = conn.prepareStatement(UPDATE_QUERY)) {
-			
-			stmt.setString(1, bc.getCheckedOut());
-			stmt.setString(2, bc.getDueDate());
-			stmt.setString(3, bc.getReturned());
-			stmt.setInt(4, bc.getPatronId());
-			stmt.setString(5, bc.getIsbn());
-			
-			int rowCount = stmt.executeUpdate();
-			if (rowCount > 0) {
-				return true;
-			} else {
-				return false;
-			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public boolean updateCheckout(BookCheckout bc) throws SQLException{
 		
-		return false;
+		PreparedStatement stmt = conn.prepareStatement(UPDATE_QUERY);
+			
+		stmt.setString(1, bc.getCheckedOut());
+		stmt.setString(2, bc.getDueDate());
+		stmt.setString(3, bc.getReturned());
+		stmt.setInt(4, bc.getPatronId());
+		stmt.setString(5, bc.getIsbn());
+		
+		int rowCount = stmt.executeUpdate();
+		stmt.close();
+		
+		if (rowCount > 0) {
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 	
 }

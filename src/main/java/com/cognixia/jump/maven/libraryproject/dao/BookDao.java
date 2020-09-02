@@ -24,142 +24,142 @@ public class BookDao {
 	private static final String UPDATE_BOOK = "update book set title = ?, descr = ? where isbn = ?";
 
 	
-public List<Book> getAllBooks() {
+public List<Book> getAllBooks() throws SQLException {
 		
 	List<Book> allBooks = new ArrayList<Book>();
 	
-	try(PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_BOOKS);
-			ResultSet rs = stmt.executeQuery() ) {
+	PreparedStatement stmt = conn.prepareStatement(SELECT_ALL_BOOKS);
+	ResultSet rs = stmt.executeQuery();
+	
+	while(rs.next()) {
 		
-		while(rs.next()) {
-			
-			String isbn = rs.getString("isbn");
-			String title = rs.getString("title");
-			String descr = rs.getString("descr");
-			boolean rented = rs.getBoolean("rented");
-			String addedToLibrary = rs.getString("added_to_library");
-			
-			allBooks.add(new Book(isbn, title, descr, rented, addedToLibrary));	
-		}
-	} catch(SQLException e) {
-		e.printStackTrace();
+		String isbn = rs.getString("isbn");
+		String title = rs.getString("title");
+		String descr = rs.getString("descr");
+		boolean rented = rs.getBoolean("rented");
+		String addedToLibrary = rs.getString("added_to_library");
+		
+		allBooks.add(new Book(isbn, title, descr, rented, addedToLibrary));	
 	}
+
+	rs.close();
+	stmt.close();
+	
 	return allBooks;
 }
 
 
-public Book getBookByIsbn(String isbn) {
+public Book getBookByIsbn(String isbn) throws SQLException {
 		
 	Book book = null;
 	
-	try(PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_BY_ISBN)) {
+	PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_BY_ISBN);
 		
-		stmt.setString(1, isbn);
+	stmt.setString(1, isbn);
+	
+	ResultSet rs = stmt.executeQuery();
+	
+	if(rs.next()) {
+		String title = rs.getString("title");
+		String descr = rs.getString("descr");
+		boolean rented = rs.getBoolean("rented");
+		String addedToLibrary = rs.getString("added_to_library");
 		
-		ResultSet rs = stmt.executeQuery();
-		
-		if(rs.next()) {
-			String title = rs.getString("title");
-			String descr = rs.getString("descr");
-			boolean rented = rs.getBoolean("rented");
-			String addedToLibrary = rs.getString("added_to_library");
-			
-			book = new Book(isbn, title, descr, rented, addedToLibrary);
-		}
-		
-	} catch(SQLException e) {
-		e.printStackTrace();
+		book = new Book(isbn, title, descr, rented, addedToLibrary);
 	}
+	
+	rs.close();
+	stmt.close();
+		
 	return book;
 }
 
 
 //@SuppressWarnings("hiding")
-public ArrayList<Book> getAllRented(boolean rented) {
+public ArrayList<Book> getAllRented(boolean rented) throws SQLException {
 	
 	ArrayList<Book> rentedBooks = new ArrayList<Book>();
 	Book book = null;
 
-	try(PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_RENTED)) {
+	PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_RENTED);
 		
-		stmt.setBoolean(1, true);
+	stmt.setBoolean(1, true);
+	
+	ResultSet rs = stmt.executeQuery();
+	
+	while(rs.next()) {
 		
-		ResultSet rs = stmt.executeQuery();
+		String isbn = rs.getString("isbn");
+		String title = rs.getString("title");
+		String descr = rs.getString("descr");
+		String addedToLibrary = rs.getString("added_to_library");
 		
-		while(rs.next()) {
-			
-			String isbn = rs.getString("isbn");
-			String title = rs.getString("title");
-			String descr = rs.getString("descr");
-			String addedToLibrary = rs.getString("added_to_library");
-			
-			rentedBooks.add(new Book(isbn, title, descr, rented, addedToLibrary));	
-		}
-		
-	} catch(SQLException e) {
-		e.printStackTrace();
+		rentedBooks.add(new Book(isbn, title, descr, rented, addedToLibrary));	
 	}
+	
+	rs.close();
+	stmt.close();
 	return rentedBooks;
 }
 
-public ArrayList<Book> getAllAvailable(boolean rented) {
+public ArrayList<Book> getAllAvailable(boolean rented) throws SQLException {
 	ArrayList<Book> availableBooks = new ArrayList<Book>();
 	Book book = null;
 	
-	try(PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_AVAILABLE)) {
+	PreparedStatement stmt = conn.prepareStatement(SELECT_BOOK_AVAILABLE);
 		
-		stmt.setBoolean(1, false);
+	stmt.setBoolean(1, false);
+	
+	ResultSet rs = stmt.executeQuery();
+	
+	while(rs.next()) {
 		
-		ResultSet rs = stmt.executeQuery();
+		String isbn = rs.getString("isbn");
+		String title = rs.getString("title");
+		String descr = rs.getString("descr");
+		String addedToLibrary = rs.getString("added_to_library");
 		
-		while(rs.next()) {
-			
-			String isbn = rs.getString("isbn");
-			String title = rs.getString("title");
-			String descr = rs.getString("descr");
-			String addedToLibrary = rs.getString("added_to_library");
-			
-			availableBooks.add(new Book(isbn, title, descr, rented, addedToLibrary));	
-		}
-	} catch(SQLException e) {
-		e.printStackTrace();
+		availableBooks.add(new Book(isbn, title, descr, rented, addedToLibrary));	
 	}
+
+	rs.close();
+	stmt.close();
+	
 	return availableBooks;
 }
 
-public boolean addBook(Book book) {
+public boolean addBook(Book book) throws SQLException {
 	
-	try(PreparedStatement stmt = conn.prepareStatement(INSERT_BOOK)) {
+	PreparedStatement stmt = conn.prepareStatement(INSERT_BOOK);
 		
-		stmt.setString(1, book.getIsbn());
-		stmt.setString(2, book.getTitle());
-		stmt.setString(3, book.getDescr());
-		stmt.setBoolean(4, book.isRented());
-		stmt.setString(5, book.getAddedToLibrary());
-		
-		if(stmt.executeUpdate() > 0) {
-			return true;
-		}
-	} catch(SQLException e) {
-		e.printStackTrace();
-	}	
+	stmt.setString(1, book.getIsbn());
+	stmt.setString(2, book.getTitle());
+	stmt.setString(3, book.getDescr());
+	stmt.setBoolean(4, book.isRented());
+	stmt.setString(5, book.getAddedToLibrary());
+	
+	if(stmt.executeUpdate() > 0) {
+		return true;
+	}
+	stmt.close();
+
 	return false;
 }
 
-public boolean updateBook(Book book) {
+public boolean updateBook(Book book) throws SQLException {
 	
-	try (PreparedStatement stmt = conn.prepareStatement(UPDATE_BOOK)) {
+	PreparedStatement stmt = conn.prepareStatement(UPDATE_BOOK);
 
-		stmt.setString(1, book.getTitle());
-		stmt.setString(2, book.getDescr());
-		stmt.setString(3, book.getIsbn());
+	stmt.setString(1, book.getTitle());
+	stmt.setString(2, book.getDescr());
+	stmt.setString(3, book.getIsbn());
 
-		if (stmt.executeUpdate() > 0) {
-			return true;
-		}
-	} catch (SQLException e) {
-		e.printStackTrace();
+	if (stmt.executeUpdate() > 0) {
+		return true;
 	}
+
+	stmt.close();
+	
 	return false;
 }
 }

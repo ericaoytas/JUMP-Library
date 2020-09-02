@@ -86,24 +86,23 @@ public class LibrarianDao {
 		return lib;
 	}
 	
-	public Librarian getByUsername(String usr) {
+	public Librarian getByUsername(String usr) throws SQLException {
 		Librarian lib = null;
 		
-		try (PreparedStatement stmt = conn.prepareStatement(GET_BY_USERNAME_QUERY)) {
+		PreparedStatement stmt = conn.prepareStatement(GET_BY_USERNAME_QUERY);
 			
-			stmt.setString(1, usr);
-			
-			ResultSet rs = stmt.executeQuery();
-			rs.next();
-			int librarianId = rs.getInt("librarian_id");
-			String username = rs.getString("username");
-			String password = rs.getString("password");
-			
-			lib = new Librarian(librarianId, username, password);
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		stmt.setString(1, usr);
+		
+		ResultSet rs = stmt.executeQuery();
+		rs.next();
+		int librarianId = rs.getInt("librarian_id");
+		String username = rs.getString("username");
+		String password = rs.getString("password");
+		
+		lib = new Librarian(librarianId, username, password);
+		
+		rs.close();
+		stmt.close();
 		
 		return lib;
 	}

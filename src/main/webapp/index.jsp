@@ -2,7 +2,7 @@
 <div class="login">
 <HR WIDTH="100%" COLOR="#dbe2ef" SIZE="10px" style="height:10px">
   <h2><strong>Login Information</strong></h2>
-<form action="LoginServlet" method="POST">
+<form action="login" method="POST">
   <div class="imgcontainer">
     <img src="https://cdn.onlinewebfonts.com/svg/img_258083.png" alt="Avatar" class="avatar" style="padding: 1% 10%">
   </div>
